@@ -1,5 +1,7 @@
 const Project = require('./models/Project'); // Import the model
 
+const path = require('path');
+
 // 1. Import Express
 const express = require('express');
 const cors = require('cors'); // Import CORS
@@ -8,6 +10,9 @@ const app = express();
 
 app.use(cors()); // Tell Express to use it.
 app.use(express.json()); // Allow us to read JSON data sent from frontend
+
+// Serve static files from the current directory
+app.use(express.static(__dirname));
 
 // Connection String
 const uri = "mongodb+srv://humanrevolutionone_db_user:nCLrzV6Yb2wgT7ot@portfoliodb.wgszoyb.mongodb.net/?appName=PortfolioDB";
@@ -43,11 +48,9 @@ app.get('/api/projects', async (req, res) => {
 
 // 3. Start the Server
 const PORT = process.env.PORT || 3000;
-// A new route that sends JSON data
-app.get('/api/projects', (req, res) => {
 
-  // Instead of .send (text), we use .json (data)
-  res.json(projects);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
