@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header>
+      <nav>
+        <h1>My Portfolio</h1>
+        <button id="theme-toggle">🌙 Mode</button>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#Projects">Projects</a></li>
+          <li><a href="#Contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+    <section id="hero">
+      <h2>Hello, I'm Bhaskar JS</h2>
+      <p>Aspiring Full Stack Engineer & DevSecOps Enthusiast</p>
+      <button>View My Work</button>
+    </section>
+    <section id="projects">
+      <h2>My Projects</h2>
+      <div class="project-grid">
+        <div class="card">
+          <h3>Projects 1</h3>
+          <p>A generic HTML/CSS landing page.</p>
+        </div>
+        <div class="card">
+          <h3>Projects 2</h3>
+          <p>A dynamic JavaScript quiz game.</p>
+        </div>
+        <div class="card">
+          <h3>Project 3</h3>
+          <p>My first full-stack application.</p>
+        </div>
+      </div>
+    </section>
+    <section id="about">
+      <h2>About Me</h2>
+      <p>I am learning to build full stack applications. Currently focusing on HTML, CSS, and JavaScript.</p>
+    </section>
+
+    <section id="game">
+      <h2>Tic-Tac-Toe</h2>
+      <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+      </div>
+      <h3 id="status">Player X's Turn</h3>
+      <button id="restart">Restart Game</button>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 Bhaskar Jyoti Sonowal. All rights reserved.</p>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+</html>
