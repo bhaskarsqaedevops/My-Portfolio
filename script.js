@@ -141,3 +141,39 @@ async function fetchProjects() {
 // Call the function to test it
 fetchProjects();
 
+
+const projectForm = document.getElementById('project-form');
+
+projectForm.addEventListener('submit', async (e) => {
+  e.preventDefault(); // STOP the page from refreshing!
+
+  // 1. Get the values from the input fields
+  const name = document.getElementById('project-name').value;
+  const tech = document.getElementById('project-tech').value;
+
+  // 2. Create the data object
+  const newProject = { name, tech };
+
+  try {
+    // 3. Send the POST request
+    const response = await fetch('/api/projects', {
+      method: 'POST', // Tell the server we are ADDING data
+      headers: {
+        'Content-Type': 'application/json' // Label the package so server knows it's JSON
+      },
+      body: JSON.stringify(newProject) // Convert JS object to text for sending 
+    });
+
+    // 4. Handle success
+    if (response.ok) {
+      alert('Project Added!');
+      projectForm.reset(); // Clear the form inputs
+      fetchProjects(); // Refresh the list so the new project shows up immediaely
+    } else {
+      alert('Failed to add project');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
+

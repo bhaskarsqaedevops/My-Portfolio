@@ -46,6 +46,25 @@ app.get('/api/projects', async (req, res) => {
   res.json(projects);
 });
 
+// Handle POST requests to add a new project
+app.post('.api/projects', async (req, res) => {
+  try {
+    // 1. Create a new project using the data sent from the frontend (req.body)
+    const newProject = new Project({
+      name: req.body.name,
+      tech: req.body.tech
+    });
+
+    // 2. Save it to the database
+    const savedProject = await newProject.save();
+
+    // 3. Send the saved project back to the frontend as confirmation
+    res.json(savedProject);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to saved project" });
+  }
+});
+
 // 3. Start the Server
 const PORT = process.env.PORT || 3000;
 
