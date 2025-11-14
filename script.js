@@ -177,3 +177,5 @@ projectForm.addEventListener('submit', async (e) => {
   }
 });
 
+fetchProjects();
+
