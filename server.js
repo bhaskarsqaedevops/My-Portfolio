@@ -42,7 +42,7 @@ app.get('/api/projects', async (req, res) => {
 });
 
 // 3. Start the Server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 // A new route that sends JSON data
 app.get('/api/projects', (req, res) => {
 
