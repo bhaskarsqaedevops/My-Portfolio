@@ -1,4 +1,6 @@
-const Project = require('./models/Project'); // Import the model
+require('dotenv').config();
+
+const Project = require('./models/Project'); // Import the mode
 
 const path = require('path');
 
@@ -15,7 +17,7 @@ app.use(express.json()); // Allow us to read JSON data sent from frontend
 app.use(express.static(__dirname));
 
 // Connection String
-const uri = "mongodb+srv://humanrevolutionone_db_user:nCLrzV6Yb2wgT7ot@portfoliodb.wgszoyb.mongodb.net/?appName=PortfolioDB";
+const uri = process.env.MONGO_URI;
 
 // The Connection Code
 mongoose.connect(uri)

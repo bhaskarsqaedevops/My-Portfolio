@@ -107,7 +107,7 @@ function checkWinner() {
 async function fetchProjects() {
   try {
     //  1. Ask the server for data
-    const response = await fetch('http://localhost:3000/api/projects');
+    const response = await fetch('/api/projects');
     // 2. Convert the response to JSON
     const data = await response.json();
 
