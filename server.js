@@ -1,33 +1,27 @@
 require('dotenv').config();
 
-const Project = require('./models/Project'); // Import the mode
-
+const Project = require('./models/Project'); 
 const path = require('path');
-
-// 1. Import Express
 const express = require('express');
-const cors = require('cors'); // Import CORS
-const mongoose = require('mongoose'); // Import Mongoose
+const cors = require('cors'); 
+const mongoose = require('mongoose'); 
 const app = express();
 
-app.use(cors()); // Tell Express to use it.
-app.use(express.json()); // Allow us to read JSON data sent from frontend
-
-// Serve static files from the current directory
+app.use(cors()); 
+app.use(express.json()); 
 app.use(express.static(__dirname));
 
-// Connection String
 const uri = process.env.MONGO_URI;
 
-// The Connection Code
 mongoose.connect(uri)
 .then(() => console.log("✅ MongoDB Connected!"))
 .catch(err => console.log("❌ MongoDB Connection Error:", err));
 
-// --- SEED ROUTE (Run this once to fill the database) ---
+/* --- ROUTES --- */
+
 app.get('/api/seed', async (req, res) => {
   const sampleProjects = [
-    { name: "personal Portfolio", tech: "HTML/CSS" },
+    { name: "Personal Portfolio", tech: "HTML/CSS" },
     { name: "Tic-Tac-Toe", tech: "JavaScript" },
     { name: "Task Manager", tech: "Node.js" }
   ];
@@ -40,34 +34,46 @@ app.get('/api/seed', async (req, res) => {
   }
 });
 
-// 2. Define a "Route"
-// This says: "When someone visits the home page ('/'), say hello."
 app.get('/api/projects', async (req, res) => {
-  // Use the Model to find ALL projects in the database
   const projects = await Project.find();
   res.json(projects);
 });
 
-// Handle POST requests to add a new project
 app.post('/api/projects', async (req, res) => {
   try {
-    // 1. Create a new project using the data sent from the frontend (req.body)
     const newProject = new Project({
       name: req.body.name,
       tech: req.body.tech
     });
-
-    // 2. Save it to the database
     const savedProject = await newProject.save();
-
-    // 3. Send the saved project back to the frontend as confirmation
     res.json(savedProject);
   } catch (error) {
     res.status(500).json({ error: "Failed to save project" });
   }
 });
 
-// 3. Start the Server
+// THE DELETE ROUTE (Updated with .trim())
+app.delete('/api/projects/:id', async (req, res) => {
+  try {
+    // trim() removes any accidental spaces from the ID string
+    const id = req.params.id.trim(); 
+
+    const deletedProject = await Project.findByIdAndDelete(id);
+
+    // Check if we actually found and deleted something
+    if (!deletedProject) {
+        return res.status(404).json({ error: "Project not found" });
+    }
+
+    res.json({ message: "Project deleted successfully!" });
+
+  } catch (error) {
+      console.error("Delete Error:", error); // Log the actual error to console
+      res.status(500).json({ error: "Failed to delete project" });
+  }
+});
+
+/* --- SERVER START --- */
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {

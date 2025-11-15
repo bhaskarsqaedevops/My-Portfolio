@@ -35,6 +35,21 @@ nav a {
   text-decoration: none; /* Removes the underline */
 }
 
+#theme-toggle {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%; /* Make the hover effect circular */
+  transition: transform 0.3s ease; /* Smooth animation */
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1); /* Slightly grow when hovered */
+  background-color: rgba(0,0,0,0.1); /* Subtle circle background on hover */
+}
+
 #hero {
   text-align: center; 
   padding: 100px 20px; /* Adds lots of space top/bottom */
@@ -126,6 +141,26 @@ body.dark-mode .card {
   border-color: #333;
 }
 
+body.dark-mode #hero {
+  background-color: #1e1e1e; /* Match the dark card background */
+  color: #ffffff;
+}
+
+body.dark-mode header {
+  background-color: #000000; /* Make header slightly darker for contrast */
+  border-bottom: 1px solid #333;
+}
+
+body.dark-mode input {
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+}
+
+body.dark-mode #theme-toggle:hover {
+  background-color: rgb(255,255,255,0.2);
+}
+
 /* The Game Board Container */
 .board {
     display: grid;
@@ -151,4 +186,14 @@ body.dark-mode .card {
 /* Hover effect to show it's clickable */
 .cell:hover {
   background-color: #f0f0f0;
+}
+
+body.dark-mode .cell {
+  background-color: #1e1e1e;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .cell:hover {
+  background-color: #333;
 }

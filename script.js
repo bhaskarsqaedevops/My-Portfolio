@@ -1,15 +1,34 @@
-// 1. Select the button
+/* --- GLOBAL SELECTIONS --- */
 const toggleButton = document.getElementById('theme-toggle');
-
-// 2. Select the body
 const body = document.body;
+const projectContainer = document.querySelector('.project-grid'); // Global container selection
+const projectForm = document.getElementById('project-form');
 
-// 3. Add the event listener
+/* --- FEATURE: DARK MODE --- */
+
+// 1. Manual Toggle Listener
 toggleButton.addEventListener('click', () => {
   body.classList.toggle('dark-mode');
+
+  // Logic to swap the icon text
+  if (body.classList.contains('dark-mode')) {
+    toggleButton.textContent = '☀️';
+  } else {
+    toggleButton.textContent = '🌙';
+  }
 });
 
-/* --- TIC TAC TOE LOGIC --- */
+// 2. Automatic Time Check (Runs on load)
+function checkTime() {
+  const hour = new Date().getHours();
+  // Check if it is after 6 PM (18) OR before 5 AM (5)
+  if (hour > 18 || hour < 5) {
+    document.body.classList.add('dark-mode');
+    toggleButton.textContent = '☀️'; 
+  }
+}
+
+/* --- FEATURE: TIC TAC TOE --- */
 
 // 1. Select Elements
 const cells = document.querySelectorAll('.cell');
@@ -17,23 +36,16 @@ const statusText = document.querySelector('#status');
 const restartBtn = document.querySelector('#restart');
 
 // 2. Game Variables
-let options = ["", "", "", "", "", "", "", "", ""]; // Stores X or O for each cell
+let options = ["", "", "", "", "", "", "", "", ""]; 
 const winConditions = [
-    [0, 1, 2], // Top Row
-    [3, 4, 5], // Middle Row
-    [6, 7, 8], // Bottom Row
-    [0, 3, 6], // Left Column
-    [1, 4, 7], // Middle Column
-    [2, 5, 8], // Right Column
-    [0, 4, 8], // Diagonal Top-Left -> Bottom-Right
-    [2, 4, 6]  // Diagonal Top-Right -> Bottom-Left
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+    [0, 4, 8], [2, 4, 6]             // Diagonals
 ];
 let currentPlayer = "X";
 let running = false;
 
-// 3. Initialize Game
-initializeGame();
-
+// 3. Game Logic Functions
 function initializeGame() {
   cells.forEach(cell => cell.addEventListener("click", cellClicked));
   restartBtn.addEventListener("click", restartGame);
@@ -41,23 +53,18 @@ function initializeGame() {
   running = true;
 };
 
-// 4. Handle Clicks
 function cellClicked() {
   const cellIndex = this.getAttribute("data-index");
-
-  // If cell is taken or game is over, do nothing
   if (options[cellIndex] != "" || !running) {
     return;
   };
-
   updateCell(this, cellIndex);
-
   checkWinner();
 };
 
 function updateCell(cell, index) {
   options[index] = currentPlayer;
-  cell.textContent = currentPlayer; // Updates the UI
+  cell.textContent = currentPlayer; 
 };
 
 function changePlayer() {
@@ -75,16 +82,13 @@ function restartGame() {
 
 function checkWinner() {
   let roundWon = false;
-
   for (let i = 0; i < winConditions.length; i++) {
     const condition = winConditions[i];
     const cellA = options[condition[0]];
     const cellB = options[condition[1]];
     const cellC = options[condition[2]];
 
-    if (cellA == "" || cellB == "" || cellC == "") {
-      continue; // Skip empty cells
-    }
+    if (cellA == "" || cellB == "" || cellC == "") { continue; }
     if (cellA == cellB && cellB == cellC) {
       roundWon = true;
       break;
@@ -102,73 +106,61 @@ function checkWinner() {
   }
 };
 
-/* --- FETCH PROJECTS FROM API --- */
+/* --- FEATURE: PROJECT MANAGEMENT (CRUD) --- */
 
-async function fetchProjects() {
-  try {
-    //  1. Ask the server for data
-    const response = await fetch('/api/projects');
-    // 2. Convert the response to JSON
-    const data = await response.json();
+// 1. The Delete Listener (Event Delegation) - RUNS ONCE
+projectContainer.addEventListener('click', async (e) => {
+    // Check if the clicked element is our delete button
+    if (e.target.classList.contains('delete-btn')) {
+      
+      // Grab the secret ID from the luggage tag
+      const id = e.target.getAttribute('data-id');
+      
+      // Confirm with the user
+      if(!confirm('Are you sure you want to delete this project?')) return;
 
-    // Find the container where projects should go
-    const projectContainer = document.querySelector('.project-grid');
+      // Call the helper function
+      deleteProject(id);
+    }
+});
 
-    // Clear any existing content (optional, but good practice)
-    projectContainer.innerHTML = '';
+// 2. The Helper Function to Delete
+async function deleteProject(id) {
+    try {
+      const response = await fetch(`/api/projects/${id}`, {
+        method: 'DELETE'
+      });
 
-    // Loop through the data and create HTML for each project
-    data.forEach(project => {
-      // Create the card div
-      const card = document.createElement('div');
-      card.classList.add('card');
+      if (response.ok) {
+        alert("Project Deleted!");
+        fetchProjects(); // Refresh the list instantly
+      } else {
+        alert("Failed to delete");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+}
 
-      // Set the inner HTML of the card
-      card.innerHTML = `
-        <h3>${project.name}</h3>
-        <p>Tech Stack: ${project.tech}</p>
-      `;
-
-      // Add the card to the container
-      projectContainer.appendChild(card);
-    });
-
-  } catch (error) {
-    console.log("Error fetching projects:", error);
-  }
-};
-
-// Call the function to test it
-fetchProjects();
-
-
-const projectForm = document.getElementById('project-form');
-
+// 3. The Add Project Listener
 projectForm.addEventListener('submit', async (e) => {
-  e.preventDefault(); // STOP the page from refreshing!
+  e.preventDefault(); 
 
-  // 1. Get the values from the input fields
   const name = document.getElementById('project-name').value;
   const tech = document.getElementById('project-tech').value;
-
-  // 2. Create the data object
   const newProject = { name, tech };
 
   try {
-    // 3. Send the POST request
     const response = await fetch('/api/projects', {
-      method: 'POST', // Tell the server we are ADDING data
-      headers: {
-        'Content-Type': 'application/json' // Label the package so server knows it's JSON
-      },
-      body: JSON.stringify(newProject) // Convert JS object to text for sending 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProject) 
     });
 
-    // 4. Handle success
     if (response.ok) {
       alert('Project Added!');
-      projectForm.reset(); // Clear the form inputs
-      fetchProjects(); // Refresh the list so the new project shows up immediaely
+      projectForm.reset(); 
+      fetchProjects(); 
     } else {
       alert('Failed to add project');
     }
@@ -177,5 +169,38 @@ projectForm.addEventListener('submit', async (e) => {
   }
 });
 
-fetchProjects();
+// 4. The Fetch Function 
+async function fetchProjects() {
+  try {
+    const response = await fetch('/api/projects');
+    const data = await response.json();
 
+    // Clear any existing content
+    projectContainer.innerHTML = '';
+
+    // Loop through the data and create HTML for each project
+    data.forEach(project => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+
+      // Create HTML with Delete Button
+      card.innerHTML = `
+          <div class="card-content">
+            <h3>${project.name}</h3>
+            <p>Tech Stack: ${project.tech}</p>
+          </div>
+          <button class="delete-btn" data-id="${project._id}">🗑️</button>
+      `;
+
+      projectContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.log("Error fetching projects:", error);
+  }
+};
+
+/* --- INITIALIZATION --- */
+checkTime();      // Set dark mode based on time
+initializeGame(); // Start Tic Tac Toe
+fetchProjects();  // Load projects from server
