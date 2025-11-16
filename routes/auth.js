@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
     }
 
     // 3. Generate a Token (The Badge)
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
 
     res.json({ token });
 

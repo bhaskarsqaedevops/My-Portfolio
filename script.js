@@ -7,6 +7,7 @@ const loginSection = document.getElementById('login-section');
 const loginForm = document.getElementById('login-form');
 const logoutBtn = document.getElementById('logout-btn');
 const addProjectSection = document.getElementById('add-project');
+let currentEditId = null; // Stores the ID of the project being edited
 
 /* --- FEATURE: DARK MODE --- */
 
@@ -184,6 +185,27 @@ projectContainer.addEventListener('click', async (e) => {
       // Call the helper function
       deleteProject(id);
     }
+
+    // EDIT LOGIC
+    else if (e.target.classList.contains('edit-btn')) {
+      const id = e.target.getAttribute('data-id');
+      const card = e.target.closest('.card'); // Find the parent card
+
+      // Grab the text from the card
+      const name = card.querySelector('h3').innerText;
+      // Remove the "Tech Stack: " label to et just the value
+      const tech = card.querySelector('p').innerText.replace('Tech Stack: ', '');
+
+      // Fill the form inputs
+      document.getElementById('project-name').value = name;
+      document.getElementById('project-tech').value = tech;
+
+      // Change the button text to show we are updating
+      document.querySelector('#project-form button').innerText = 'Update Project';
+
+      // Save the ID so the submit button knows which one to update
+      currentEditId = id;
+    }
 });
 
 // 2. The Helper Function to Delete
@@ -207,34 +229,63 @@ async function deleteProject(id) {
     }
 }
 
-// 3. The Add Project Listener
+// 3. The "Smart" Form Listener (Handles Add AND Update)
 projectForm.addEventListener('submit', async (e) => {
-  e.preventDefault(); 
+    e.preventDefault();
 
-  const name = document.getElementById('project-name').value;
-  const tech = document.getElementById('project-tech').value;
-  const newProject = { name, tech };
+    const name = document.getElementById('project-name').value;
+    const tech = document.getElementById('project-tech').value;
 
-  try {
-    const response = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('token') // Dynamic token
-       },
-      body: JSON.stringify(newProject) 
-    });
+    if (currentEditId) {
+        // --- UPDATE MODE (PUT) ---
+        try {
+            const response = await fetch(`/api/projects/${currentEditId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({ name, tech })
+            });
 
-    if (response.ok) {
-      alert('Project Added!');
-      projectForm.reset(); 
-      fetchProjects(); 
+            if (response.ok) {
+                alert("Project Updated!");
+                projectForm.reset();
+                fetchProjects();
+                
+                // Reset the mode back to "Add"
+                currentEditId = null;
+                document.querySelector('#project-form button').innerText = 'Add Project';
+            } else {
+                alert("Failed to update");
+            }
+        } catch (error) {
+            console.error("Update Error:", error);
+        }
     } else {
-      alert('Failed to add project');
+        // --- CREATE MODE (POST) ---
+        const newProject = { name, tech };
+        try {
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify(newProject)
+            });
+
+            if (response.ok) {
+                alert('Project Added!');
+                projectForm.reset();
+                fetchProjects();
+            } else {
+                alert('Failed to add project');
+            }
+        } catch (error) {
+            console.error('Add Error:', error);
+        }
     }
-  } catch (error) {
-    console.error('Error:', error);
-  }
 });
 
 // 4. The Fetch Function 
@@ -257,7 +308,10 @@ async function fetchProjects() {
             <h3>${project.name}</h3>
             <p>Tech Stack: ${project.tech}</p>
           </div>
-          <button class="delete-btn" data-id="${project._id}">🗑️</button>
+          <div class="card-actions">
+            <button class="edit-btn" data-id="${project._id}">✏️</button>
+            <button class="delete-btn" data-id="${project._id}">🗑️</button>
+          </div>
       `;
 
       projectContainer.appendChild(card);
