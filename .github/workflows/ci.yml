@@ -32,7 +32,15 @@ jobs:
       # Step 3: Install all your dependencies
       - name: Install dependencies
         run: npm install
+
+        # Step 4: Run security audit
+      - name: Run security audit
+        run: npm audit
       
-      # Step 4: Run your test command
+      # Step 5: Run your test command
+      - name: Run tests
+        run: npm test
+      
+      # Step 6: Run your test command
       - name: Run tests
         run: npm test
