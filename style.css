@@ -197,3 +197,8 @@ body.dark-mode .cell {
 body.dark-mode .cell:hover {
   background-color: #333;
 }
+
+/* Utility class to hide elements */
+.hidden {
+  display: none !important;
+}

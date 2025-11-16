@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const auth = require('./middleware/authMiddleware');
 const Project = require('./models/Project'); 
 const path = require('path');
 const express = require('express');
@@ -18,6 +19,9 @@ mongoose.connect(uri)
 .catch(err => console.log("❌ MongoDB Connection Error:", err));
 
 /* --- ROUTES --- */
+
+const authRoutes = require('./routes/auth'); // Import the file
+app.use('/api/auth', authRoutes); //Use it!
 
 app.get('/api/seed', async (req, res) => {
   const sampleProjects = [
@@ -39,7 +43,8 @@ app.get('/api/projects', async (req, res) => {
   res.json(projects);
 });
 
-app.post('/api/projects', async (req, res) => {
+// Protect the POST route
+app.post('/api/projects', auth, async (req, res) => {
   try {
     const newProject = new Project({
       name: req.body.name,
@@ -53,7 +58,7 @@ app.post('/api/projects', async (req, res) => {
 });
 
 // THE DELETE ROUTE (Updated with .trim())
-app.delete('/api/projects/:id', async (req, res) => {
+app.delete('/api/projects/:id', auth, async (req, res) => {
   try {
     // trim() removes any accidental spaces from the ID string
     const id = req.params.id.trim(); 

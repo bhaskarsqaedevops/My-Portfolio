@@ -3,6 +3,10 @@ const toggleButton = document.getElementById('theme-toggle');
 const body = document.body;
 const projectContainer = document.querySelector('.project-grid'); // Global container selection
 const projectForm = document.getElementById('project-form');
+const loginSection = document.getElementById('login-section');
+const loginForm = document.getElementById('login-form');
+const logoutBtn = document.getElementById('logout-btn');
+const addProjectSection = document.getElementById('add-project');
 
 /* --- FEATURE: DARK MODE --- */
 
@@ -106,6 +110,64 @@ function checkWinner() {
   }
 };
 
+/* --- FEATURE: AUTHENTICATION --- */
+
+// 1. Check if user is logged in on page load
+function checkLoginStatus() {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    // User is logged in
+    loginSection.classList.add('hidden');
+    addProjectSection.classList.remove('hidden');
+    logoutBtn.style.display = 'block';
+  } else {
+    // User is NOT logged in
+    loginSection.classList.remove('hidden');
+    addProjectSection.classList.add('hidden');
+    logoutBtn.style.display = 'none';
+  }
+}
+
+// 2. Handle Login Submit
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // SAVE THE TOKEN!
+      localStorage.setItem('token', data.token);
+      alert("Logged in successfully!");
+      checkLoginStatus(); // Update UI
+    } else {
+      alert(data.error);
+    }
+  } catch (error) {
+    console.error("Login Error:", error);
+  }
+});
+
+// 3. Handle Logout
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('token'); // Destroy the token
+  alert("Logged out!");
+  checkLoginStatus(); // Update UI
+});
+
+// Run on load
+checkLoginStatus();
+
 /* --- FEATURE: PROJECT MANAGEMENT (CRUD) --- */
 
 // 1. The Delete Listener (Event Delegation) - RUNS ONCE
@@ -128,7 +190,10 @@ projectContainer.addEventListener('click', async (e) => {
 async function deleteProject(id) {
     try {
       const response = await fetch(`/api/projects/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       });
 
       if (response.ok) {
@@ -153,7 +218,10 @@ projectForm.addEventListener('submit', async (e) => {
   try {
     const response = await fetch('/api/projects', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token') // Dynamic token
+       },
       body: JSON.stringify(newProject) 
     });
 
